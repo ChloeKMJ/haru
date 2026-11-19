@@ -6,158 +6,159 @@
 <title>저녁 기록</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
-<meta name="theme-color" content="#2f5d3a">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161616" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --paper: #fbf9f1; --desk: #ece6d6; --ink: #22201c; --soft: #6b665a; --rule: #d9d3c0;
-  --green: #2f5d3a; --red: #b3261e; --blue: #1f4fa3;
-  --t-light: #dcebd6; --t-mid: #f7e6a3; --t-heavy: #d9e2f4; --on-tone: #22201c;
-  --serif: "Gowun Batang", "Noto Serif KR", serif;
-  --sans: system-ui, "Noto Sans KR", sans-serif;
-}
+:root { --bg: #fff; --ink: #1d1d1d; --soft: #6a6a6a; --box: #f2f2f2; --red: #e2432b; --on-ink: #fff; }
 @media (prefers-color-scheme: dark) {
-  :root { --paper: #232a25; --desk: #171c18; --ink: #ece7d8; --soft: #a39d8c; --rule: #414a41;
-          --green: #9cc7a5; --red: #ee7268; --blue: #9dbcf2;
-          --t-light: #35523b; --t-mid: #6a5a1f; --t-heavy: #2f426b; --on-tone: #f4f0e2; }
+  :root { --bg: #161616; --ink: #f2f2f2; --soft: #a5a5a5; --box: #272727; --red: #f0745f; --on-ink: #161616; }
 }
 * { box-sizing: border-box; }
-html { background: var(--desk); }
+html { background: var(--bg); }
 body {
-  margin: 0 auto; max-width: 520px; min-height: 100dvh; color: var(--ink); font: 16px/1.6 var(--sans);
-  padding: max(22px, env(safe-area-inset-top)) 20px 150px;
+  margin: 0 auto; max-width: 480px; min-height: 100dvh; color: var(--ink);
+  font: 16px/1.5 "IBM Plex Sans KR", system-ui, sans-serif;
+  padding: max(22px, env(safe-area-inset-top)) 18px 170px;
 }
-:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+button { font: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid #2a5bd7; outline-offset: 2px; }
 
-/* 일력 한 장 — 이 화면의 얼굴. 도장은 여기에 찍힌다 */
-.cal {
-  position: relative; background: var(--paper); border: 2px solid var(--ink); text-align: center; padding-bottom: 16px;
-  box-shadow: 4px 4px 0 var(--paper), 4px 4px 0 2px var(--ink), 8px 8px 0 var(--paper), 8px 8px 0 2px var(--ink);
-  margin: 0 8px 8px 0;
-}
-.cal .month {
-  margin: 0; background: var(--green); color: var(--paper); font: 700 17px/1 var(--sans); padding: 12px 0;
-  background-image: radial-gradient(circle, var(--desk) 5px, transparent 6px), radial-gradient(circle, var(--desk) 5px, transparent 6px);
-  background-size: 14px 14px; background-repeat: no-repeat; background-position: 26% 50%, 74% 50%;
-}
-.cal h1 { margin: 6px 0 0; font: 700 112px/1.05 var(--serif); letter-spacing: -0.03em; }
-.cal .dow { margin: 0; font: 700 19px/1.3 var(--serif); }
-.cal.sat h1, .cal.sat .dow { color: var(--blue); }
-.cal.sun h1, .cal.sun .dow { color: var(--red); }
+/* 머리: 왼쪽 날짜·물음, 오른쪽 도장 든 직원 */
+header { position: relative; display: flex; align-items: flex-end; justify-content: space-between; min-height: 112px; margin-bottom: 14px; }
+header p { margin: 0; font-size: 14px; color: var(--soft); }
+h1 { margin: 2px 0 6px; font-size: 34px; line-height: 1.2; font-weight: 700; letter-spacing: -0.02em; }
+.who { width: 118px; flex: none; margin: 0 -6px -6px 0; }
+.who svg { display: block; width: 100%; overflow: visible; }
+.who .prop { transform-box: fill-box; transform-origin: 50% 0; }
+.who.hit .prop { animation: hit .5s ease-out; }
+@keyframes hit { 30% { transform: translate(-10px, 12px) rotate(-18deg); } }
 #mark {
-  position: absolute; right: 16px; bottom: 14px; width: 92px; height: 92px; border-radius: 50%;
-  border: 4px double var(--red); color: var(--red); display: grid; place-content: center;
-  font: 700 17px/1.25 var(--serif); transform: rotate(-11deg); opacity: .9; background: transparent;
+  position: absolute; right: 104px; bottom: 8px; width: 68px; height: 68px; border-radius: 50%;
+  border: 3px solid var(--red); color: var(--red); display: grid; place-content: center; text-align: center;
+  font: 700 14px/1.2 "IBM Plex Sans KR", sans-serif; transform: rotate(-10deg);
 }
 #mark[hidden] { display: none; }
-#mark.new { animation: press .34s cubic-bezier(.2, .9, .3, 1.25); }
-@keyframes press { from { transform: rotate(-11deg) scale(2.1); opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { #mark.new { animation: none; } }
+#mark.new { animation: press .3s .22s cubic-bezier(.2, .9, .3, 1.3) backwards; }
+@keyframes press { from { transform: rotate(-10deg) scale(1.9); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { #mark.new, .who.hit .prop { animation: none; } }
 
-.notice { margin: 22px 0 0; padding: 10px 12px; border: 1px solid var(--blue); color: var(--blue); font-size: 14px; background: var(--paper); }
+.notice { margin: 0 0 12px; padding: 12px 14px; border-radius: 16px; background: var(--box); font-size: 14px; }
 .notice[hidden] { display: none; }
 
-h2 { margin: 34px 0 2px; font: 700 23px/1.35 var(--serif); }
-.hint { margin: 0 0 14px; color: var(--soft); font-size: 14px; }
+/* 기분: 네 가지 색 구역 */
+.quad { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.q { border-radius: 22px; padding: 14px 10px 12px 12px; min-height: 178px; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 7px; }
+.q b { flex-basis: 100%; font-size: 13px; font-weight: 600; opacity: .78; margin-bottom: 2px; }
+.q button { background: rgba(255, 255, 255, .55); border: 0; border-radius: 999px; padding: 9px 14px; min-height: 40px; font-size: 16px; font-weight: 600; color: inherit; }
+.q button[aria-pressed="true"] { background: #1d1d1d; color: #fff; }
+.y { background: #f9d85a; color: #4a3900; } .r { background: #f0745f; color: #4a0e05; }
+.g { background: #8fd0a0; color: #0f3a1c; } .u { background: #8fb0ee; color: #0e2452; }
+.n { grid-column: 1 / -1; min-height: 0; background: var(--box); color: var(--ink); align-items: center; }
+.n b { flex-basis: auto; margin: 0 4px 0 2px; }
+.n button { background: var(--bg); }
+.n button[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
 
-/* 기분 낱말 — 결이 같은 것끼리 한 묶음, 고르면 그 결의 색이 찬다 */
-.group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-left: 12px; border-left: 5px solid var(--tone); margin-bottom: 14px; }
-.group.light { --tone: var(--t-light); } .group.mid { --tone: var(--t-mid); } .group.heavy { --tone: var(--t-heavy); }
-.group.none { --tone: var(--rule); grid-template-columns: 1fr; }
-.group button, .two button {
-  font: 500 16px/1.2 var(--sans); color: var(--ink); background: var(--paper);
-  border: 1.5px solid var(--ink); padding: 14px 4px; min-height: 50px; cursor: pointer; border-radius: 0;
-}
-.group button[aria-pressed="true"] { background: var(--tone); color: var(--on-tone); font-weight: 700; box-shadow: 3px 3px 0 var(--ink); transform: translate(-1px, -1px); }
-.group.none button { border-style: dashed; }
-.group.none button[aria-pressed="true"] { background: var(--ink); color: var(--paper); box-shadow: none; transform: none; }
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.two button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--paper); font-weight: 700; }
-.two button[data-v="0"][aria-pressed="true"] { background: var(--ink); border-color: var(--ink); }
+.field { margin-top: 10px; background: var(--box); border-radius: 18px; padding: 12px 14px; }
+.field label, .field .lab { display: block; font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+textarea { display: block; width: 100%; border: 0; background: transparent; color: var(--ink); resize: none; font: inherit; font-size: 17px; height: 76px; padding: 0; }
+textarea:focus { outline: none; }
+.field:focus-within { outline: 3px solid #2a5bd7; outline-offset: 2px; }
+textarea::placeholder { color: var(--soft); }
+.read { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.read .lab { margin: 0; font-size: 16px; }
+.read div { display: flex; gap: 6px; }
+.read button { background: var(--bg); color: var(--ink); border: 0; border-radius: 999px; padding: 9px 14px; min-height: 40px; font-size: 15px; font-weight: 600; }
+.read button[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
 
-textarea {
-  display: block; width: 100%; border: 1.5px solid var(--ink); resize: none; color: var(--blue); border-radius: 0;
-  background: repeating-linear-gradient(transparent, transparent 37px, var(--rule) 37px, var(--rule) 38px) var(--paper);
-  background-position: 0 6px; font: 400 19px/38px var(--serif); padding: 6px 12px 0; height: 126px;
-}
-textarea::placeholder { color: var(--soft); opacity: .75; }
+.bar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--bg); padding: 8px 18px calc(18px + env(safe-area-inset-bottom)); }
+.bar > div { max-width: 444px; margin: 0 auto; }
+#state { margin: 0 0 8px; font-size: 14px; color: var(--soft); text-align: center; min-height: 21px; }
+#stamp { width: 100%; background: var(--ink); color: var(--on-ink); border: 0; border-radius: 18px; padding: 17px; font-size: 18px; font-weight: 700; }
+#stamp:disabled { background: var(--box); color: var(--soft); cursor: default; }
+#stamp:active:not(:disabled) { transform: scale(.98); }
 
-/* 아래 고정 띠 + 도장 */
-.bar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--desk); border-top: 2px solid var(--ink); padding: 10px 20px calc(10px + env(safe-area-inset-bottom)); }
-.bar div { max-width: 480px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-#state { margin: 0; font-size: 14px; color: var(--soft); }
-#stamp {
-  flex: none; width: 88px; height: 88px; border-radius: 50%; cursor: pointer;
-  background: var(--red); color: var(--paper); border: 0; outline: 2px solid var(--red); outline-offset: 3px;
-  font: 700 23px/1 var(--serif); transform: rotate(-8deg);
-}
-#stamp:focus-visible { outline: 3px solid var(--blue); }
-#stamp:disabled { background: transparent; color: var(--soft); outline: 2px dashed var(--soft); cursor: default; }
-#stamp:active:not(:disabled) { transform: rotate(-8deg) scale(.92); }
-
-details { margin-top: 34px; border-top: 2px solid var(--ink); padding-top: 10px; }
-details + details { margin-top: 10px; border-top: 1px solid var(--rule); }
-summary { font-weight: 600; cursor: pointer; padding: 8px 0; }
-#past { list-style: none; margin: 6px 0 0; padding: 0; }
-#past li { padding: 9px 0; border-bottom: 1px dashed var(--rule); font-size: 15px; }
-#past time { color: var(--green); font-weight: 700; margin-right: 8px; }
-#past .wait { color: var(--blue); font-size: 13px; margin-left: 6px; }
-label { display: block; margin-top: 12px; font-size: 14px; color: var(--soft); }
-input { width: 100%; font: 16px var(--sans); color: var(--ink); background: var(--paper); border: 1.5px solid var(--ink); padding: 10px; border-radius: 0; margin-top: 4px; }
-.plain { margin-top: 14px; font: 600 15px var(--sans); color: var(--paper); background: var(--green); border: 0; padding: 12px 16px; cursor: pointer; }
+details { margin-top: 10px; background: var(--box); border-radius: 18px; padding: 4px 14px; }
+details:first-of-type { margin-top: 28px; }
+summary { font-weight: 600; padding: 10px 0; cursor: pointer; }
+#past { list-style: none; margin: 0; padding: 0 0 8px; }
+#past li { padding: 9px 0; border-top: 1px solid var(--bg); font-size: 15px; }
+#past time { font-weight: 700; margin-right: 8px; }
+#past .wait { color: var(--red); font-size: 13px; margin-left: 6px; }
+.set label { display: block; margin-top: 10px; font-size: 14px; color: var(--soft); }
+.set input { width: 100%; margin-top: 4px; font: inherit; color: var(--ink); background: var(--bg); border: 0; border-radius: 12px; padding: 11px 12px; }
+.set .hint { margin: 0; font-size: 14px; color: var(--soft); }
+#saveSet { margin: 14px 0 6px; background: var(--ink); color: var(--on-ink); border: 0; border-radius: 14px; padding: 12px 18px; font-weight: 700; }
+#setMsg { min-height: 21px; padding-bottom: 8px; }
 </style>
 </head>
 <body>
-<header class="cal" id="cal">
-  <p class="month" id="month"></p>
-  <h1 id="day"></h1>
-  <p class="dow" id="dow"></p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="wobble" x="-10%" y="-10%" width="120%" height="120%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G"/>
+  </filter></defs></svg>
+
+<header>
+  <div>
+    <p id="date"></p>
+    <h1>지금 어때요?</h1>
+  </div>
   <div id="mark" hidden></div>
+  <!-- 비서실 직원 '저녁 기록' (공용\비서실 껍데기\캐릭터_손그림.js 로 뽑은 그림) -->
+  <div class="who" id="who" aria-hidden="true">
+    <svg viewBox="0 0 120 124"><g filter="url(#wobble)">
+      <path d="M30 118 C30 92 90 92 90 118 Z" fill="#2a5bd7" stroke="#1d1d1d" stroke-width="3"/>
+      <circle cx="60" cy="60" r="26" fill="#fff" stroke="#1d1d1d" stroke-width="3"/><path d="M32 50 C34 30 86 30 88 50 L80 44 L72 52 L64 44 L56 52 L48 44 L40 52 Z" fill="#1d1d1d"/><circle cx="50" cy="60" r="2.6" fill="#1d1d1d"/><circle cx="70" cy="60" r="2.6" fill="#1d1d1d"/><path d="M54 70 Q60 76 66 70" fill="none" stroke="#1d1d1d" stroke-width="3" stroke-linecap="round"/><circle cx="42" cy="68" r="4" fill="#f7a8b8" opacity=".7"/><circle cx="78" cy="68" r="4" fill="#f7a8b8" opacity=".7"/>
+      <g class="prop"><g transform="translate(92 104) rotate(12)"><rect x="-4" y="-28" width="8" height="14" rx="3" fill="#e2432b" stroke="#1d1d1d" stroke-width="3"/><rect x="-11" y="-14" width="22" height="8" rx="2" fill="#fff" stroke="#1d1d1d" stroke-width="3"/><rect x="-13" y="-6" width="26" height="4" fill="#1d1d1d"/></g></g>
+    </g></svg>
+  </div>
 </header>
 <p class="notice" id="notice" hidden>아직 노트와 연결되지 않았어요. 맨 아래 연결 설정을 채우면, 적어 둔 기록이 한꺼번에 넘어가요.</p>
 
-<h2>지금 어때요?</h2>
-<p class="hint">여러 개 골라도 돼요. 맞는 말이 없으면 아래 줄에 적어요.</p>
-<div id="moods"></div>
+<div class="quad" id="moods"></div>
 
-<h2><label for="line" style="all:unset">한 줄로 적는다면</label></h2>
-<p class="hint">안 적어도 돼요.</p>
-<textarea id="line" maxlength="300" placeholder="오늘 제일 오래 남은 일"></textarea>
-
-<h2>오늘 책 10분 읽었어요?</h2>
-<div class="two" id="read">
-  <button type="button" data-v="1" aria-pressed="false">읽었어요</button>
-  <button type="button" data-v="0" aria-pressed="false">못 읽었어요</button>
+<div class="field">
+  <label for="line">한 줄로 적는다면</label>
+  <textarea id="line" maxlength="300" placeholder="오늘 제일 오래 남은 일. 안 적어도 돼요."></textarea>
+</div>
+<div class="field read">
+  <span class="lab">오늘 책 10분</span>
+  <div id="read">
+    <button type="button" data-v="1" aria-pressed="false">읽었어요</button>
+    <button type="button" data-v="0" aria-pressed="false">못 읽었어요</button>
+  </div>
 </div>
 
 <details>
   <summary>지난 기록</summary>
   <ul id="past"></ul>
 </details>
-<details id="setBox">
+<details class="set">
   <summary>연결 설정</summary>
   <p class="hint">기록을 깃허브 비공개 저장소에 보내는 데 써요. 이 폰에만 저장돼요.</p>
   <label>깃허브 계정 이름 <input id="owner" autocomplete="off" autocapitalize="off"></label>
   <label>저장소 이름 <input id="repo" autocomplete="off" autocapitalize="off" placeholder="haru-data"></label>
   <label>열쇠(토큰) <input id="token" type="password" autocomplete="off"></label>
-  <button class="plain" id="saveSet" type="button">설정 저장</button>
+  <button id="saveSet" type="button">설정 저장</button>
   <p class="hint" id="setMsg" role="status"></p>
 </details>
 
 <div class="bar"><div>
-  <p id="state" role="status">고르거나 적으면 도장을 찍을 수 있어요.</p>
+  <p id="state" role="status"></p>
   <button id="stamp" type="button" disabled>적기</button>
 </div></div>
 
 <script>
-// 결이 같은 낱말끼리 한 묶음: 가벼운 것 / 그저 그런 것 / 무거운 것 / 모르겠음
+// 기분 낱말 — 기운(높음·낮음) × 느낌(좋음·힘듦) 네 구역 + 어느 쪽도 아닌 것
 const MOODS = [
-  ["light", ["편안함", "뿌듯함", "즐거움", "설렘", "고마움", "홀가분함"]],
-  ["mid",   ["무덤덤", "피곤함", "지침"]],
-  ["heavy", ["답답함", "불안함", "짜증", "서운함", "우울함", "허전함"]],
-  ["none",  ["잘 모르겠음"]],
+  ["y", "기운 나고 좋음", ["뿌듯함", "즐거움", "설렘"]],
+  ["r", "기운이 곤두섬", ["답답함", "불안함", "짜증"]],
+  ["g", "잔잔하고 좋음", ["편안함", "고마움", "홀가분함"]],
+  ["u", "가라앉음", ["피곤함", "지침", "서운함", "우울함", "허전함"]],
+  ["n", "어느 쪽도 아님", ["무덤덤", "잘 모르겠음"]],
 ];
 const $ = id => document.getElementById(id);
 const store = {
@@ -170,17 +171,13 @@ const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())
 function dayOf(now) { const d = new Date(now); if (d.getHours() < 4) d.setDate(d.getDate() - 1); return d; }
 
 const today = dayOf(new Date());
-$("month").textContent = `${today.getFullYear()}년 ${today.getMonth() + 1}월`;
-$("day").textContent = today.getDate();
-$("dow").textContent = `${"일월화수목금토"[today.getDay()]}요일 저녁`;
-$("cal").classList.toggle("sat", today.getDay() === 6);
-$("cal").classList.toggle("sun", today.getDay() === 0);
-document.title = `저녁 기록 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+$("date").textContent = `${today.getMonth() + 1}월 ${today.getDate()}일 ${"일월화수목금토"[today.getDay()]}요일 저녁`;
 
-for (const [tone, words] of MOODS) {
-  const g = document.createElement("div"); g.className = "group " + tone;
+for (const [tone, title, words] of MOODS) {
+  const g = document.createElement("div"); g.className = "q " + tone; g.setAttribute("role", "group"); g.setAttribute("aria-label", title);
+  const b = document.createElement("b"); b.textContent = title; g.append(b);
   for (const m of words) {
-    const b = document.createElement("button"); b.type = "button"; b.textContent = m; b.setAttribute("aria-pressed", "false"); g.append(b);
+    const x = document.createElement("button"); x.type = "button"; x.textContent = m; x.setAttribute("aria-pressed", "false"); g.append(x);
   }
   $("moods").append(g);
 }
@@ -190,7 +187,7 @@ const readVal = () => { const b = document.querySelector("#read [aria-pressed=tr
 function refresh() {
   const n = picked().length, has = n || $("line").value.trim() || readVal() !== null;
   $("stamp").disabled = !has;
-  $("state").textContent = !has ? "고르거나 적으면 도장을 찍을 수 있어요." : n ? `기분 ${n}개 골랐어요. 도장을 찍으면 적혀요.` : "도장을 찍으면 노트에 적혀요.";
+  $("state").textContent = !has ? "기분을 고르거나 한 줄을 적어 주세요." : n ? `기분 ${n}개 골랐어요.` : "";
 }
 $("moods").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
@@ -236,7 +233,8 @@ function explain(err) {
 
 function showMark(rec, fresh) {
   const m = $("mark"); m.hidden = false; m.innerHTML = `${rec.시각}<br>적음`;
-  m.classList.toggle("new", !!fresh);
+  m.classList.remove("new"); $("who").classList.remove("hit");
+  if (fresh) { void m.offsetWidth; m.classList.add("new"); $("who").classList.add("hit"); }
 }
 function drawPast() {
   const waiting = new Set(store.get("q", []).map(x => x.id));
@@ -260,7 +258,7 @@ $("stamp").addEventListener("click", async () => {
   store.set("h", [rec, ...store.get("h", [])].slice(0, 60));
   document.querySelectorAll("[aria-pressed=true]").forEach(b => b.setAttribute("aria-pressed", "false"));
   $("line").value = ""; $("stamp").disabled = true;
-  showMark(rec, true); drawPast(); scrollTo({ top: 0, behavior: "smooth" });
+  scrollTo({ top: 0, behavior: "smooth" }); showMark(rec, true); drawPast();
   $("state").textContent = "보내는 중이에요.";
   const err = await flush();
   $("state").textContent = explain(err) || "적었어요. 내일 아침 노트에 들어가요.";
@@ -282,7 +280,7 @@ $("saveSet").addEventListener("click", async () => {
   } catch { $("setMsg").textContent = "인터넷 연결을 확인해 주세요."; }
 });
 
-loadSet(); drawPast();
+loadSet(); drawPast(); refresh();
 const last = store.get("h", [])[0];
 if (last && last.날짜 === ymd(today)) showMark(last, false);
 flush().then(drawPast);
