@@ -181,10 +181,14 @@ for (const [tone, title, words] of MOODS) {
 const picked = () => [...document.querySelectorAll("#moods [aria-pressed=true]")].map(b => b.textContent);
 const readVal = () => { const b = document.querySelector("#read [aria-pressed=true]"); return b ? b.dataset.v === "1" : null; };
 
+const doneToday = () => { const l = store.get("h", [])[0]; return !!l && l.날짜 === ymd(dayOf(new Date())); };
 function refresh() {
   const n = picked().length, has = n || $("line").value.trim() || readVal() !== null;
   $("stamp").disabled = !has;
-  $("state").textContent = !has ? "기분을 고르거나 한 줄을 적어 주세요." : n ? `기분 ${n}개 골랐어요.` : "";
+  const again = doneToday();
+  $("stamp").textContent = again ? "다시 적기" : "적기";
+  $("state").textContent = !has ? (again ? "오늘은 적었어요. 다시 적으면 새 것으로 바뀌어요." : "기분을 고르거나 한 줄을 적어 주세요.")
+    : n ? `기분 ${n}개 골랐어요.` : "";
 }
 $("moods").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
@@ -252,9 +256,9 @@ $("stamp").addEventListener("click", async () => {
                 날짜: ymd(d), 시각: `${pad(now.getHours())}:${pad(now.getMinutes())}`,
                 기분: picked(), 한줄: $("line").value.trim(), 독서: readVal() };
   store.set("q", [...store.get("q", []), rec]);            // 먼저 폰에 적고 나서 보낸다
-  store.set("h", [rec, ...store.get("h", [])].slice(0, 60));
+  store.set("h", [rec, ...store.get("h", []).filter(x => x.날짜 !== rec.날짜)].slice(0, 60));   // 같은 날은 마지막 것만
   document.querySelectorAll("[aria-pressed=true]").forEach(b => b.setAttribute("aria-pressed", "false"));
-  $("line").value = ""; $("stamp").disabled = true;
+  $("line").value = ""; refresh();
   scrollTo({ top: 0, behavior: "smooth" }); showMark(rec, true); drawPast();
   $("state").textContent = "보내는 중이에요.";
   const err = await flush();
