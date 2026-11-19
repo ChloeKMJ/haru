@@ -129,6 +129,11 @@ summary { font-weight: 600; padding: 10px 0; cursor: pointer; }
   </div>
 </div>
 
+<div class="field" id="weekBox" hidden>
+  <label for="week">다음 주에 하나만 바꾼다면</label>
+  <textarea id="week" maxlength="200" placeholder="주간 회고에 들어가요. 안 적어도 돼요."></textarea>
+</div>
+
 <details>
   <summary>지난 기록</summary>
   <ul id="past"></ul>
@@ -170,6 +175,8 @@ function dayOf(now) { const d = new Date(now); if (d.getHours() < 4) d.setDate(d
 const today = dayOf(new Date());
 $("date").textContent = `${today.getMonth() + 1}월 ${today.getDate()}일 ${"일월화수목금토"[today.getDay()]}요일 저녁`;
 
+$("weekBox").hidden = today.getDay() !== 0;   // 일요일 저녁에만: 주간 회고의 한 줄
+
 for (const [tone, title, words] of MOODS) {
   const g = document.createElement("div"); g.className = "q " + tone; g.setAttribute("role", "group"); g.setAttribute("aria-label", title);
   const b = document.createElement("b"); b.textContent = title; g.append(b);
@@ -183,7 +190,7 @@ const readVal = () => { const b = document.querySelector("#read [aria-pressed=tr
 
 const doneToday = () => { const l = store.get("h", [])[0]; return !!l && l.날짜 === ymd(dayOf(new Date())); };
 function refresh() {
-  const n = picked().length, has = n || $("line").value.trim() || readVal() !== null;
+  const n = picked().length, has = n || $("line").value.trim() || $("week").value.trim() || readVal() !== null;
   $("stamp").disabled = !has;
   const again = doneToday();
   $("stamp").textContent = again ? "다시 적기" : "적기";
@@ -201,6 +208,7 @@ $("read").addEventListener("click", e => {
   b.setAttribute("aria-pressed", !on); refresh();
 });
 $("line").addEventListener("input", refresh);
+$("week").addEventListener("input", refresh);
 
 // ── 보내기: 기록 하나 = 저장소의 파일 하나(log/날짜T시각.json). 못 보낸 것은 폰에 두었다가 다음에 다시 보낸다.
 const cfg = () => store.get("cfg", {});
@@ -254,11 +262,11 @@ $("stamp").addEventListener("click", async () => {
   const now = new Date(), d = dayOf(now);
   const rec = { id: `${ymd(now)}T${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`,
                 날짜: ymd(d), 시각: `${pad(now.getHours())}:${pad(now.getMinutes())}`,
-                기분: picked(), 한줄: $("line").value.trim(), 독서: readVal() };
+                기분: picked(), 한줄: $("line").value.trim(), 독서: readVal(), 회고: $("week").value.trim() };
   store.set("q", [...store.get("q", []), rec]);            // 먼저 폰에 적고 나서 보낸다
   store.set("h", [rec, ...store.get("h", []).filter(x => x.날짜 !== rec.날짜)].slice(0, 60));   // 같은 날은 마지막 것만
   document.querySelectorAll("[aria-pressed=true]").forEach(b => b.setAttribute("aria-pressed", "false"));
-  $("line").value = ""; refresh();
+  $("line").value = ""; $("week").value = ""; refresh();
   scrollTo({ top: 0, behavior: "smooth" }); showMark(rec, true); drawPast();
   $("state").textContent = "보내는 중이에요.";
   const err = await flush();
