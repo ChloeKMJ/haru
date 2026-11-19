@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>저녁 기록</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<meta name="theme-color" content="#2f5d3a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #fbf9f1; --desk: #ece6d6; --ink: #22201c; --soft: #6b665a; --rule: #d9d3c0;
+  --green: #2f5d3a; --red: #b3261e; --blue: #1f4fa3;
+  --t-light: #dcebd6; --t-mid: #f7e6a3; --t-heavy: #d9e2f4; --on-tone: #22201c;
+  --serif: "Gowun Batang", "Noto Serif KR", serif;
+  --sans: system-ui, "Noto Sans KR", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --paper: #232a25; --desk: #171c18; --ink: #ece7d8; --soft: #a39d8c; --rule: #414a41;
+          --green: #9cc7a5; --red: #ee7268; --blue: #9dbcf2;
+          --t-light: #35523b; --t-mid: #6a5a1f; --t-heavy: #2f426b; --on-tone: #f4f0e2; }
+}
+* { box-sizing: border-box; }
+html { background: var(--desk); }
+body {
+  margin: 0 auto; max-width: 520px; min-height: 100dvh; color: var(--ink); font: 16px/1.6 var(--sans);
+  padding: max(22px, env(safe-area-inset-top)) 20px 150px;
+}
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* 일력 한 장 — 이 화면의 얼굴. 도장은 여기에 찍힌다 */
+.cal {
+  position: relative; background: var(--paper); border: 2px solid var(--ink); text-align: center; padding-bottom: 16px;
+  box-shadow: 4px 4px 0 var(--paper), 4px 4px 0 2px var(--ink), 8px 8px 0 var(--paper), 8px 8px 0 2px var(--ink);
+  margin: 0 8px 8px 0;
+}
+.cal .month {
+  margin: 0; background: var(--green); color: var(--paper); font: 700 17px/1 var(--sans); padding: 12px 0;
+  background-image: radial-gradient(circle, var(--desk) 5px, transparent 6px), radial-gradient(circle, var(--desk) 5px, transparent 6px);
+  background-size: 14px 14px; background-repeat: no-repeat; background-position: 26% 50%, 74% 50%;
+}
+.cal h1 { margin: 6px 0 0; font: 700 112px/1.05 var(--serif); letter-spacing: -0.03em; }
+.cal .dow { margin: 0; font: 700 19px/1.3 var(--serif); }
+.cal.sat h1, .cal.sat .dow { color: var(--blue); }
+.cal.sun h1, .cal.sun .dow { color: var(--red); }
+#mark {
+  position: absolute; right: 16px; bottom: 14px; width: 92px; height: 92px; border-radius: 50%;
+  border: 4px double var(--red); color: var(--red); display: grid; place-content: center;
+  font: 700 17px/1.25 var(--serif); transform: rotate(-11deg); opacity: .9; background: transparent;
+}
+#mark[hidden] { display: none; }
+#mark.new { animation: press .34s cubic-bezier(.2, .9, .3, 1.25); }
+@keyframes press { from { transform: rotate(-11deg) scale(2.1); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { #mark.new { animation: none; } }
+
+.notice { margin: 22px 0 0; padding: 10px 12px; border: 1px solid var(--blue); color: var(--blue); font-size: 14px; background: var(--paper); }
+.notice[hidden] { display: none; }
+
+h2 { margin: 34px 0 2px; font: 700 23px/1.35 var(--serif); }
+.hint { margin: 0 0 14px; color: var(--soft); font-size: 14px; }
+
+/* 기분 낱말 — 결이 같은 것끼리 한 묶음, 고르면 그 결의 색이 찬다 */
+.group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-left: 12px; border-left: 5px solid var(--tone); margin-bottom: 14px; }
+.group.light { --tone: var(--t-light); } .group.mid { --tone: var(--t-mid); } .group.heavy { --tone: var(--t-heavy); }
+.group.none { --tone: var(--rule); grid-template-columns: 1fr; }
+.group button, .two button {
+  font: 500 16px/1.2 var(--sans); color: var(--ink); background: var(--paper);
+  border: 1.5px solid var(--ink); padding: 14px 4px; min-height: 50px; cursor: pointer; border-radius: 0;
+}
+.group button[aria-pressed="true"] { background: var(--tone); color: var(--on-tone); font-weight: 700; box-shadow: 3px 3px 0 var(--ink); transform: translate(-1px, -1px); }
+.group.none button { border-style: dashed; }
+.group.none button[aria-pressed="true"] { background: var(--ink); color: var(--paper); box-shadow: none; transform: none; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.two button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--paper); font-weight: 700; }
+.two button[data-v="0"][aria-pressed="true"] { background: var(--ink); border-color: var(--ink); }
+
+textarea {
+  display: block; width: 100%; border: 1.5px solid var(--ink); resize: none; color: var(--blue); border-radius: 0;
+  background: repeating-linear-gradient(transparent, transparent 37px, var(--rule) 37px, var(--rule) 38px) var(--paper);
+  background-position: 0 6px; font: 400 19px/38px var(--serif); padding: 6px 12px 0; height: 126px;
+}
+textarea::placeholder { color: var(--soft); opacity: .75; }
+
+/* 아래 고정 띠 + 도장 */
+.bar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--desk); border-top: 2px solid var(--ink); padding: 10px 20px calc(10px + env(safe-area-inset-bottom)); }
+.bar div { max-width: 480px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#state { margin: 0; font-size: 14px; color: var(--soft); }
+#stamp {
+  flex: none; width: 88px; height: 88px; border-radius: 50%; cursor: pointer;
+  background: var(--red); color: var(--paper); border: 0; outline: 2px solid var(--red); outline-offset: 3px;
+  font: 700 23px/1 var(--serif); transform: rotate(-8deg);
+}
+#stamp:focus-visible { outline: 3px solid var(--blue); }
+#stamp:disabled { background: transparent; color: var(--soft); outline: 2px dashed var(--soft); cursor: default; }
+#stamp:active:not(:disabled) { transform: rotate(-8deg) scale(.92); }
+
+details { margin-top: 34px; border-top: 2px solid var(--ink); padding-top: 10px; }
+details + details { margin-top: 10px; border-top: 1px solid var(--rule); }
+summary { font-weight: 600; cursor: pointer; padding: 8px 0; }
+#past { list-style: none; margin: 6px 0 0; padding: 0; }
+#past li { padding: 9px 0; border-bottom: 1px dashed var(--rule); font-size: 15px; }
+#past time { color: var(--green); font-weight: 700; margin-right: 8px; }
+#past .wait { color: var(--blue); font-size: 13px; margin-left: 6px; }
+label { display: block; margin-top: 12px; font-size: 14px; color: var(--soft); }
+input { width: 100%; font: 16px var(--sans); color: var(--ink); background: var(--paper); border: 1.5px solid var(--ink); padding: 10px; border-radius: 0; margin-top: 4px; }
+.plain { margin-top: 14px; font: 600 15px var(--sans); color: var(--paper); background: var(--green); border: 0; padding: 12px 16px; cursor: pointer; }
+</style>
+</head>
+<body>
+<header class="cal" id="cal">
+  <p class="month" id="month"></p>
+  <h1 id="day"></h1>
+  <p class="dow" id="dow"></p>
+  <div id="mark" hidden></div>
+</header>
+<p class="notice" id="notice" hidden>아직 노트와 연결되지 않았어요. 맨 아래 연결 설정을 채우면, 적어 둔 기록이 한꺼번에 넘어가요.</p>
+
+<h2>지금 어때요?</h2>
+<p class="hint">여러 개 골라도 돼요. 맞는 말이 없으면 아래 줄에 적어요.</p>
+<div id="moods"></div>
+
+<h2><label for="line" style="all:unset">한 줄로 적는다면</label></h2>
+<p class="hint">안 적어도 돼요.</p>
+<textarea id="line" maxlength="300" placeholder="오늘 제일 오래 남은 일"></textarea>
+
+<h2>오늘 책 10분 읽었어요?</h2>
+<div class="two" id="read">
+  <button type="button" data-v="1" aria-pressed="false">읽었어요</button>
+  <button type="button" data-v="0" aria-pressed="false">못 읽었어요</button>
+</div>
+
+<details>
+  <summary>지난 기록</summary>
+  <ul id="past"></ul>
+</details>
+<details id="setBox">
+  <summary>연결 설정</summary>
+  <p class="hint">기록을 깃허브 비공개 저장소에 보내는 데 써요. 이 폰에만 저장돼요.</p>
+  <label>깃허브 계정 이름 <input id="owner" autocomplete="off" autocapitalize="off"></label>
+  <label>저장소 이름 <input id="repo" autocomplete="off" autocapitalize="off" placeholder="haru-data"></label>
+  <label>열쇠(토큰) <input id="token" type="password" autocomplete="off"></label>
+  <button class="plain" id="saveSet" type="button">설정 저장</button>
+  <p class="hint" id="setMsg" role="status"></p>
+</details>
+
+<div class="bar"><div>
+  <p id="state" role="status">고르거나 적으면 도장을 찍을 수 있어요.</p>
+  <button id="stamp" type="button" disabled>적기</button>
+</div></div>
+
+<script>
+// 결이 같은 낱말끼리 한 묶음: 가벼운 것 / 그저 그런 것 / 무거운 것 / 모르겠음
+const MOODS = [
+  ["light", ["편안함", "뿌듯함", "즐거움", "설렘", "고마움", "홀가분함"]],
+  ["mid",   ["무덤덤", "피곤함", "지침"]],
+  ["heavy", ["답답함", "불안함", "짜증", "서운함", "우울함", "허전함"]],
+  ["none",  ["잘 모르겠음"]],
+];
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+const pad = n => String(n).padStart(2, "0");
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+// ponytail: 새벽 4시 전은 전날 저녁으로 친다. 밤샘 근무가 잦아지면 설정으로 뺀다.
+function dayOf(now) { const d = new Date(now); if (d.getHours() < 4) d.setDate(d.getDate() - 1); return d; }
+
+const today = dayOf(new Date());
+$("month").textContent = `${today.getFullYear()}년 ${today.getMonth() + 1}월`;
+$("day").textContent = today.getDate();
+$("dow").textContent = `${"일월화수목금토"[today.getDay()]}요일 저녁`;
+$("cal").classList.toggle("sat", today.getDay() === 6);
+$("cal").classList.toggle("sun", today.getDay() === 0);
+document.title = `저녁 기록 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+
+for (const [tone, words] of MOODS) {
+  const g = document.createElement("div"); g.className = "group " + tone;
+  for (const m of words) {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = m; b.setAttribute("aria-pressed", "false"); g.append(b);
+  }
+  $("moods").append(g);
+}
+const picked = () => [...document.querySelectorAll("#moods [aria-pressed=true]")].map(b => b.textContent);
+const readVal = () => { const b = document.querySelector("#read [aria-pressed=true]"); return b ? b.dataset.v === "1" : null; };
+
+function refresh() {
+  const n = picked().length, has = n || $("line").value.trim() || readVal() !== null;
+  $("stamp").disabled = !has;
+  $("state").textContent = !has ? "고르거나 적으면 도장을 찍을 수 있어요." : n ? `기분 ${n}개 골랐어요. 도장을 찍으면 적혀요.` : "도장을 찍으면 노트에 적혀요.";
+}
+$("moods").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true"); refresh();
+});
+$("read").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const on = b.getAttribute("aria-pressed") === "true";
+  for (const x of $("read").children) x.setAttribute("aria-pressed", "false");
+  b.setAttribute("aria-pressed", !on); refresh();
+});
+$("line").addEventListener("input", refresh);
+
+// ── 보내기: 기록 하나 = 저장소의 파일 하나(log/날짜T시각.json). 못 보낸 것은 폰에 두었다가 다음에 다시 보낸다.
+const cfg = () => store.get("cfg", {});
+const ready = () => { const c = cfg(); return c.owner && c.repo && c.token; };
+const b64 = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
+async function send(rec) {
+  const c = cfg();
+  const r = await fetch(`https://api.github.com/repos/${c.owner}/${c.repo}/contents/log/${rec.id}.json`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${c.token}`, Accept: "application/vnd.github+json" },
+    body: JSON.stringify({ message: `기록 ${rec.id}`, content: b64(JSON.stringify(rec, null, 1)) }),
+  });
+  if (!r.ok && r.status !== 422) throw new Error(r.status);   // 422 = 이미 올라간 파일
+}
+async function flush() {
+  if (!ready()) return "설정없음";
+  let q = store.get("q", []), err = "";
+  for (const rec of [...q]) {
+    try { await send(rec); q = q.filter(x => x.id !== rec.id); store.set("q", q); }
+    catch (e) { err = String(e.message); break; }
+  }
+  return err;
+}
+function explain(err) {
+  if (!err) return "";
+  if (err === "설정없음") return "폰에 적어 뒀어요. 연결 설정을 채우면 노트로 넘어가요.";
+  if (err === "401" || err === "403") return "열쇠가 맞지 않거나 기한이 끝났어요. 연결 설정에서 새 열쇠를 넣어 주세요. 기록은 폰에 있어요.";
+  if (err === "404") return "저장소를 못 찾았어요. 연결 설정의 계정 이름과 저장소 이름을 확인해 주세요. 기록은 폰에 있어요.";
+  return "지금은 못 보냈어요. 폰에 적어 뒀고, 다음에 열 때 다시 보내요.";
+}
+
+function showMark(rec, fresh) {
+  const m = $("mark"); m.hidden = false; m.innerHTML = `${rec.시각}<br>적음`;
+  m.classList.toggle("new", !!fresh);
+}
+function drawPast() {
+  const waiting = new Set(store.get("q", []).map(x => x.id));
+  $("past").innerHTML = "";
+  for (const r of store.get("h", []).slice(0, 14)) {
+    const li = document.createElement("li"), t = document.createElement("time");
+    t.textContent = `${r.날짜.slice(5).replace("-", ".")} ${r.시각}`;
+    li.append(t, [r.기분.join(", "), r.한줄, r.독서 === true ? "책 읽음" : r.독서 === false ? "책 못 읽음" : ""].filter(Boolean).join(" / "));
+    if (waiting.has(r.id)) { const w = document.createElement("span"); w.className = "wait"; w.textContent = "보내기 전"; li.append(w); }
+    $("past").append(li);
+  }
+  if (!$("past").children.length) $("past").innerHTML = "<li>아직 적은 기록이 없어요.</li>";
+}
+
+$("stamp").addEventListener("click", async () => {
+  const now = new Date(), d = dayOf(now);
+  const rec = { id: `${ymd(now)}T${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`,
+                날짜: ymd(d), 시각: `${pad(now.getHours())}:${pad(now.getMinutes())}`,
+                기분: picked(), 한줄: $("line").value.trim(), 독서: readVal() };
+  store.set("q", [...store.get("q", []), rec]);            // 먼저 폰에 적고 나서 보낸다
+  store.set("h", [rec, ...store.get("h", [])].slice(0, 60));
+  document.querySelectorAll("[aria-pressed=true]").forEach(b => b.setAttribute("aria-pressed", "false"));
+  $("line").value = ""; $("stamp").disabled = true;
+  showMark(rec, true); drawPast(); scrollTo({ top: 0, behavior: "smooth" });
+  $("state").textContent = "보내는 중이에요.";
+  const err = await flush();
+  $("state").textContent = explain(err) || "적었어요. 내일 아침 노트에 들어가요.";
+  drawPast();
+});
+
+// ── 설정
+function loadSet() { const c = cfg(); $("owner").value = c.owner || ""; $("repo").value = c.repo || ""; $("token").value = c.token || ""; $("notice").hidden = !!ready(); }
+$("saveSet").addEventListener("click", async () => {
+  store.set("cfg", { owner: $("owner").value.trim(), repo: $("repo").value.trim(), token: $("token").value.trim() });
+  loadSet();
+  if (!ready()) return $("setMsg").textContent = "세 칸을 모두 채워 주세요.";
+  $("setMsg").textContent = "확인하는 중이에요.";
+  const c = cfg();
+  try {
+    const r = await fetch(`https://api.github.com/repos/${c.owner}/${c.repo}`, { headers: { Authorization: `Bearer ${c.token}` } });
+    $("setMsg").textContent = r.ok ? "연결됐어요." : explain(String(r.status));
+    if (r.ok) { await flush(); drawPast(); }
+  } catch { $("setMsg").textContent = "인터넷 연결을 확인해 주세요."; }
+});
+
+loadSet(); drawPast();
+const last = store.get("h", [])[0];
+if (last && last.날짜 === ymd(today)) showMark(last, false);
+flush().then(drawPast);
+</script>
+</body>
+</html>
